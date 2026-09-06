@@ -1,6 +1,6 @@
-# Local marketing review
+# Corporate website workflow
 
-The modern corporate homepage, Mind the Cards product page and updated Narrow the Number page are intentionally local-only until the operator explicitly authorises publication.
+The corporate homepage is published from `master`. Product marketing pages live in the Hodgepodge repository and are linked from the homepage.
 
 ## Start all sites
 
@@ -11,8 +11,9 @@ pwsh -File scripts/Start-LocalMarketingPreview.ps1
 - Corporate website: `http://127.0.0.1:8766/`
 - Mind the Cards: `http://127.0.0.1:8765/`
 - Narrow the Number: `http://127.0.0.1:8767/`
+- Ultimate Code Breaker: `http://127.0.0.1:8768/`
 
-When the corporate page is running on loopback, its Mind the Cards and Narrow the Number links are rewritten to ports 8765 and 8767. Away from loopback, the same links point to their intended production subdomains.
+The corporate page always links to the production product sites and stores. The local product previews are available for checking changes in their own repositories.
 
 ## Verify
 
@@ -20,6 +21,4 @@ When the corporate page is running on loopback, its Mind the Cards and Narrow th
 pwsh -File scripts/Test-CorporateWebsite.ps1 -Live
 ```
 
-## Publication gate
-
-Do not deploy, add DNS, remove the `noindex` markers or push this work until the operator explicitly approves the websites for publication.
+The production homepage must remain indexable and must never identify unreleased web applications before they are ready to be announced.

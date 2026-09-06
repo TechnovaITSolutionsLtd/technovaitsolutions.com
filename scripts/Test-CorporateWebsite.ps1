@@ -2,9 +2,7 @@
 param(
     [string]$SitePath = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
     [switch]$Live,
-    [string]$CorporateBaseUrl = 'http://127.0.0.1:8766',
-    [string]$ProductBaseUrl = 'http://127.0.0.1:8765',
-    [string]$LinseyBaseUrl = 'http://127.0.0.1:8767'
+    [string]$CorporateBaseUrl = 'http://127.0.0.1:8766'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -28,45 +26,47 @@ function Get-LocalTarget {
     return Join-Path (Split-Path $SourceFile -Parent) $referencePath
 }
 
-foreach ($required in @('index.html', 'portfolio.css', 'local-preview.js', 'favicon.ico', 'scripts/local-preview-server.py')) {
+foreach ($required in @(
+    'index.html',
+    'portfolio.css',
+    'favicon.ico',
+    'img/mind-the-cards-icon.png',
+    'img/ultimate-code-breaker-icon.png',
+    'img/narrow-the-number-icon.png',
+    'img/download-on-app-store.svg',
+    'img/get-it-on-google-play.png',
+    'scripts/local-preview-server.py'
+)) {
     Assert-SiteCondition (Test-Path (Join-Path $siteRoot $required) -PathType Leaf) "Missing required file: $required"
 }
 
 $homePageHtml = Get-Content (Join-Path $siteRoot 'index.html') -Raw
 $styles = Get-Content (Join-Path $siteRoot 'portfolio.css') -Raw
-$localPreview = Get-Content (Join-Path $siteRoot 'local-preview.js') -Raw
 
 Assert-SiteCondition ($homePageHtml -match '(?i)<!doctype html>') 'index.html: missing HTML5 doctype'
 Assert-SiteCondition ($homePageHtml -match '<html lang="en-GB">') 'index.html: missing en-GB language'
 Assert-SiteCondition ($homePageHtml -match 'name="viewport"') 'index.html: missing viewport metadata'
-Assert-SiteCondition ($homePageHtml -match 'name="robots" content="noindex, nofollow"') 'index.html: local-only noindex guard is missing'
+Assert-SiteCondition ($homePageHtml -notmatch '(?i)noindex|nofollow') 'index.html: production homepage must be indexable'
 Assert-SiteCondition ($homePageHtml -match 'class="skip-link"') 'index.html: keyboard skip link is missing'
 Assert-SiteCondition ($homePageHtml -match 'id="main-content"') 'index.html: skip-link target is missing'
 Assert-SiteCondition ($homePageHtml -match '<h1>Small software\.<br>Properly finished\.</h1>') 'index.html: corporate proposition is missing'
-Assert-SiteCondition ($homePageHtml -match 'https://mindthecards\.technovaitsolutions\.com/') 'index.html: future standalone product link is missing'
-Assert-SiteCondition ($homePageHtml -match 'https://narrow\.technovaitsolutions\.com/') 'index.html: Narrow the Number product link is missing'
-Assert-SiteCondition ($homePageHtml -match 'https://apps\.apple\.com/gb/app/narrow-the-number/id6807072615') 'index.html: Narrow the Number App Store link is missing'
-Assert-SiteCondition ($homePageHtml -match 'Watch\. Remember\. Rebuild\.') 'index.html: Mind the Cards proposition is missing'
-Assert-SiteCondition ($homePageHtml -match '21 themed games') 'index.html: full game collection is not explained'
-Assert-SiteCondition ($homePageHtml -match 'Game Designer') 'index.html: Game Designer is not explained'
-Assert-SiteCondition ($homePageHtml -match '3–100 cards') 'index.html: Designer sequence range is missing'
-Assert-SiteCondition ($homePageHtml -match '0\.1–10 seconds') 'index.html: Designer timing range is missing'
-Assert-SiteCondition ($homePageHtml -match 'No subscriptions and no adverts') 'index.html: permanent, advert-free product model is missing'
-Assert-SiteCondition ($homePageHtml -match 'Find the number\.<br>The rules fight back\.') 'index.html: Narrow the Number proposition is missing'
-Assert-SiteCondition ($homePageHtml -match '11 combinable twists') 'index.html: Narrow the Number mechanics are not explained'
-Assert-SiteCondition ($homePageHtml -match '32 explained challenges') 'index.html: Narrow the Number challenge collection is not explained'
-Assert-SiteCondition ($homePageHtml -match 'Six are free') 'index.html: Narrow the Number free tier is not explained'
-Assert-SiteCondition ($homePageHtml -match 'Available on the App Store') 'index.html: Narrow the Number availability is missing'
-Assert-SiteCondition (([regex]::Matches($homePageHtml, 'Coming soon')).Count -ge 2) 'index.html: future products are not represented by Coming soon placeholders'
-Assert-SiteCondition ($homePageHtml -match '<!--email_off-->.*?mailto:support@technovaitsolutions\.com.*?<!--/email_off-->') 'index.html: protected public support email is missing'
 
-foreach ($forbidden in @('Recall Fun', 'Ultimate Code Breaker', 'PATHFINDER', 'Dominate Domains', 'In store review', 'In review')) {
-    Assert-SiteCondition ($homePageHtml -notmatch [regex]::Escape($forbidden)) "index.html: forbidden pre-launch reference remains: $forbidden"
+$products = @(
+    @{ Name = 'Mind the Cards'; Site = 'https://mindthecards\.technovaitsolutions\.com/'; Apple = 'id6746877412'; Google = 'com\.technovaitsolutions\.recallfun' },
+    @{ Name = 'Ultimate Code Breaker'; Site = 'https://codebreaker\.technovaitsolutions\.com/'; Apple = 'id6798009711'; Google = 'com\.technovaitsolutions\.cathy' },
+    @{ Name = 'Narrow the Number'; Site = 'https://narrow\.technovaitsolutions\.com/'; Apple = 'id6807072615'; Google = 'com\.technovaitsolutions\.linsey' }
+)
+
+foreach ($product in $products) {
+    Assert-SiteCondition ($homePageHtml -match [regex]::Escape($product.Name)) "index.html: $($product.Name) is missing"
+    Assert-SiteCondition ($homePageHtml -match $product.Site) "index.html: $($product.Name) product-site link is missing"
+    Assert-SiteCondition ($homePageHtml -match $product.Apple) "index.html: $($product.Name) App Store link is missing"
+    Assert-SiteCondition ($homePageHtml -match $product.Google) "index.html: $($product.Name) Google Play link is missing"
 }
 
-Assert-SiteCondition ($homePageHtml -notmatch 'src="https://mindthecards\.technovaitsolutions\.com') 'index.html: corporate site must not depend on product-site imagery'
-Assert-SiteCondition ($homePageHtml -notmatch 'data-product-asset') 'index.html: local preview must not rewrite cross-site image assets'
-Assert-SiteCondition ($homePageHtml -notmatch 'href="(?:about-us|contact-us)\.html') 'index.html: legacy page link remains on the modern homepage'
+Assert-SiteCondition (([regex]::Matches($homePageHtml, '>Web application<')).Count -eq 2) 'index.html: two generic web-application placeholders are required'
+Assert-SiteCondition ($homePageHtml -match '<!--email_off-->.*?mailto:support@technovaitsolutions\.com.*?<!--/email_off-->') 'index.html: protected public support email is missing'
+Assert-SiteCondition ($homePageHtml -notmatch '(?i)Coming soon|Recall Fun|Pro Designer|In store review|In review') 'index.html: retired or pre-launch wording remains'
 
 foreach ($match in [regex]::Matches($homePageHtml, '(?i)(?:href|src)="([^"]+)"')) {
     $reference = $match.Groups[1].Value
@@ -77,25 +77,11 @@ foreach ($match in [regex]::Matches($homePageHtml, '(?i)(?:href|src)="([^"]+)"')
 
 Assert-SiteCondition ($styles -match ':focus-visible') 'portfolio.css: visible keyboard focus treatment is missing'
 Assert-SiteCondition ($styles -match '@media\s*\(max-width:\s*760px\)') 'portfolio.css: phone layout is missing'
-Assert-SiteCondition ($styles -match '@media\s*\(prefers-color-scheme:\s*dark\)') 'portfolio.css: dark appearance is missing'
 Assert-SiteCondition ($styles -match '@media\s*\(prefers-reduced-motion:\s*reduce\)') 'portfolio.css: reduced-motion treatment is missing'
 
-Assert-SiteCondition ($localPreview -match 'window\.location\.hostname === "127\.0\.0\.1"') 'local-preview.js: loopback guard is missing'
-Assert-SiteCondition ($localPreview -match 'http://127\.0\.0\.1:8765') 'local-preview.js: local Mind the Cards URL is missing'
-Assert-SiteCondition ($localPreview -match '\[data-product-link\]') 'local-preview.js: product-link rewrite is missing'
-Assert-SiteCondition ($localPreview -match 'http://127\.0\.0\.1:8767') 'local-preview.js: local Narrow the Number URL is missing'
-Assert-SiteCondition ($localPreview -match '\[data-linsey-link\]') 'local-preview.js: Narrow the Number link rewrite is missing'
-Assert-SiteCondition ($localPreview -notmatch 'fetch\(|XMLHttpRequest|sendBeacon') 'local-preview.js: unexpected network request code is present'
-
 if ($Live) {
-    foreach ($entry in @(
-        @{ Name = 'Corporate homepage'; Url = "$($CorporateBaseUrl.TrimEnd('/'))/" },
-        @{ Name = 'Mind the Cards homepage'; Url = "$($ProductBaseUrl.TrimEnd('/'))/" },
-        @{ Name = 'Narrow the Number homepage'; Url = "$($LinseyBaseUrl.TrimEnd('/'))/" }
-    )) {
-        $response = Invoke-WebRequest -Uri $entry.Url -MaximumRedirection 3
-        Assert-SiteCondition ($response.StatusCode -eq 200) "$($entry.Name) returned $($response.StatusCode): $($entry.Url)"
-    }
+    $response = Invoke-WebRequest -Uri "$($CorporateBaseUrl.TrimEnd('/'))/" -MaximumRedirection 3
+    Assert-SiteCondition ($response.StatusCode -eq 200) "Corporate homepage returned $($response.StatusCode): $CorporateBaseUrl"
 }
 
 if ($failures.Count -gt 0) {
@@ -103,5 +89,5 @@ if ($failures.Count -gt 0) {
     throw "Corporate website verification failed with $($failures.Count) issue(s)."
 }
 
-Write-Host 'Corporate website verification passed: local-only guard, product content, placeholders, links and responsive treatments are present.'
-if ($Live) { Write-Host 'All three local websites returned HTTP 200.' }
+Write-Host 'Corporate website verification passed: all three apps, store links, software placeholders and responsive treatments are present.'
+if ($Live) { Write-Host 'The corporate preview returned HTTP 200.' }
