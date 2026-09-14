@@ -64,6 +64,10 @@ foreach ($product in $products) {
     Assert-SiteCondition ($homePageHtml -match $product.Google) "index.html: $($product.Name) Google Play link is missing"
 }
 
+Assert-SiteCondition ($homePageHtml -match 'apps\.microsoft\.com/detail/9NQX3VX4WKCS') 'index.html: Mind the Cards Microsoft Store link is missing'
+Assert-SiteCondition ($homePageHtml -match 'get\.microsoft\.com/images/en-us%20dark\.svg') 'index.html: official Microsoft Store badge is missing'
+Assert-SiteCondition ($homePageHtml -match 'iPhone · iPad · Android · Windows') 'index.html: Mind the Cards Windows availability is missing'
+
 Assert-SiteCondition (([regex]::Matches($homePageHtml, '>Web application<')).Count -eq 2) 'index.html: two generic web-application placeholders are required'
 Assert-SiteCondition ($homePageHtml -match '<!--email_off-->.*?mailto:support@technovaitsolutions\.com.*?<!--/email_off-->') 'index.html: protected public support email is missing'
 Assert-SiteCondition ($homePageHtml -notmatch '(?i)Coming soon|Recall Fun|Pro Designer|In store review|In review') 'index.html: retired or pre-launch wording remains'
