@@ -52,9 +52,9 @@ Assert-SiteCondition ($homePageHtml -match 'id="main-content"') 'index.html: ski
 Assert-SiteCondition ($homePageHtml -match '<h1>Small software\.<br>Properly finished\.</h1>') 'index.html: corporate proposition is missing'
 
 $products = @(
-    @{ Name = 'Mind the Cards'; Site = 'https://mindthecards\.technovaitsolutions\.com/'; Apple = 'id6746877412'; Google = 'mindthecards\.technovaitsolutions\.com/google-play' },
-    @{ Name = 'Ultimate Code Breaker'; Site = 'https://codebreaker\.technovaitsolutions\.com/'; Apple = 'id6798009711'; Google = 'com\.technovaitsolutions\.cathy' },
-    @{ Name = 'Narrow the Number'; Site = 'https://narrow\.technovaitsolutions\.com/'; Apple = 'id6807072615'; Google = 'com\.technovaitsolutions\.linsey' }
+    @{ Name = 'Mind the Cards'; Site = 'https://mindthecards\.technovaitsolutions\.com/'; Apple = 'mindthecards\.technovaitsolutions\.com/app-store'; Google = 'mindthecards\.technovaitsolutions\.com/google-play' },
+    @{ Name = 'Ultimate Code Breaker'; Site = 'https://codebreaker\.technovaitsolutions\.com/'; Apple = 'codebreaker\.technovaitsolutions\.com/app-store'; Google = 'codebreaker\.technovaitsolutions\.com/google-play' },
+    @{ Name = 'Narrow the Number'; Site = 'https://narrow\.technovaitsolutions\.com/'; Apple = 'narrow\.technovaitsolutions\.com/app-store'; Google = 'narrow\.technovaitsolutions\.com/google-play' }
 )
 
 foreach ($product in $products) {
@@ -64,7 +64,7 @@ foreach ($product in $products) {
     Assert-SiteCondition ($homePageHtml -match $product.Google) "index.html: $($product.Name) Google Play link is missing"
 }
 
-Assert-SiteCondition ($homePageHtml -match 'apps\.microsoft\.com/detail/9NQX3VX4WKCS') 'index.html: Mind the Cards Microsoft Store link is missing'
+Assert-SiteCondition ($homePageHtml -match 'mindthecards\.technovaitsolutions\.com/microsoft-store') 'index.html: Mind the Cards Microsoft Store link is missing'
 Assert-SiteCondition ($homePageHtml -match 'get\.microsoft\.com/images/en-us%20dark\.svg') 'index.html: official Microsoft Store badge is missing'
 Assert-SiteCondition ($homePageHtml -match 'iPhone · iPad · Android · Windows') 'index.html: Mind the Cards Windows availability is missing'
 
