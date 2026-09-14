@@ -52,7 +52,7 @@ Assert-SiteCondition ($homePageHtml -match 'id="main-content"') 'index.html: ski
 Assert-SiteCondition ($homePageHtml -match '<h1>Small software\.<br>Properly finished\.</h1>') 'index.html: corporate proposition is missing'
 
 $products = @(
-    @{ Name = 'Mind the Cards'; Site = 'https://mindthecards\.technovaitsolutions\.com/'; Apple = 'id6746877412'; Google = 'com\.technovaitsolutions\.recallfun' },
+    @{ Name = 'Mind the Cards'; Site = 'https://mindthecards\.technovaitsolutions\.com/'; Apple = 'id6746877412'; Google = 'mindthecards\.technovaitsolutions\.com/google-play' },
     @{ Name = 'Ultimate Code Breaker'; Site = 'https://codebreaker\.technovaitsolutions\.com/'; Apple = 'id6798009711'; Google = 'com\.technovaitsolutions\.cathy' },
     @{ Name = 'Narrow the Number'; Site = 'https://narrow\.technovaitsolutions\.com/'; Apple = 'id6807072615'; Google = 'com\.technovaitsolutions\.linsey' }
 )
